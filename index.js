@@ -81,13 +81,12 @@ module.exports = function staticCache(dir, options, files) {
 
     if (enableGzip) ctx.vary('Accept-Encoding')
 
-    if (!file.buffer) {
-      var stats = await fs.stat(file.path)
-      if (stats.mtime.getTime() !== file.mtime.getTime()) {
-        file.mtime = stats.mtime
-        file.md5 = null
-        file.length = stats.size
-      }
+    var stats = await fs.stat(file.path)
+    if (stats.mtime.getTime() !== file.mtime.getTime()) {
+      file.mtime = stats.mtime
+      file.md5 = null
+      file.length = stats.size
+      file.buffer = await fs.readFileSync(file.path)
     }
 
     ctx.response.lastModified = file.mtime
